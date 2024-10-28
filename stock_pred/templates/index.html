@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Stock Pattern Detection</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        #imageList {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .processed-image {
+            max-width: 100%;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-time Stock Pattern Detection</h1>
+    <button id="startBtn">Start Screen Share</button>
+    <button id="stopBtn" disabled>Stop Screen Share</button>
+    <br><br>
+    
+    <!-- Container for displaying the list of images -->
+    <div id="imageList"></div>
+
+    <script>
+        const socket = io();
+        let mediaStream;
+        let captureInterval;
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const imageList = document.getElementById('imageList');
+
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                mediaStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                const track = mediaStream.getVideoTracks()[0];
+                const imageCapture = new ImageCapture(track);
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+
+                const captureAndSend = async () => {
+                    if (mediaStream.active) {
+                        const bitmap = await imageCapture.grabFrame();
+                        const canvas = document.createElement('canvas');
+                        canvas.width = bitmap.width;
+                        canvas.height = bitmap.height;
+                        const context = canvas.getContext('2d');
+                        context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+                        const dataUrl = canvas.toDataURL('image/jpeg');
+                        socket.emit('screen_data', dataUrl);
+                    }
+                };
+
+                captureInterval = setInterval(captureAndSend, 1000); // Capture every second
+            } catch (err) {
+                console.error("Error: " + err);
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                clearInterval(captureInterval);
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                
+                // Clear all images when the stop button is clicked
+                imageList.innerHTML = ''; // This will remove all child elements (images)
+            }
+        });
+
+        socket.on('processed_frame', (data) => {
+            if (data.has_detections) {
+                // Create a new img element for each processed frame
+                const img = document.createElement('img');
+                img.src = 'data:image/jpeg;base64,' + data.image;
+                img.alt = 'Processed screen with detections';
+                img.className = 'processed-image';
+
+                // Append the new image to the image list container
+                imageList.appendChild(img);
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Stock Pattern Detection</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        #processedImage {
+            max-width: 100%;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-time Stock Pattern Detection</h1>
+    <button id="startBtn">Start Screen Share</button>
+    <button id="stopBtn" disabled>Stop Screen Share</button>
+    <br><br>
+    <img id="processedImage" src="" alt="Processed screen with detections">
+
+    <script>
+        const socket = io();
+        let mediaStream;
+        let captureInterval;
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const processedImage = document.getElementById('processedImage');
+
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                mediaStream = await navigator.mediaDevices.getDisplayMedia({video: true});
+                const track = mediaStream.getVideoTracks()[0];
+                const imageCapture = new ImageCapture(track);
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+
+                const captureAndSend = async () => {
+                    if (mediaStream.active) {
+                        const bitmap = await imageCapture.grabFrame();
+                        const canvas = document.createElement('canvas');
+                        canvas.width = bitmap.width;
+                        canvas.height = bitmap.height;
+                        const context = canvas.getContext('2d');
+                        context.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height);
+                        const dataUrl = canvas.toDataURL('image/jpeg');
+                        socket.emit('screen_data', dataUrl);
+                    }
+                };
+
+                captureInterval = setInterval(captureAndSend, 1000); // Capture every second
+            } catch (err) {
+                console.error("Error: " + err);
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                clearInterval(captureInterval);
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                processedImage.style.display = 'none';
+            }
+        });
+
+        socket.on('processed_frame', (data) => {
+            if (data.has_detections) {
+                processedImage.src = 'data:image/jpeg;base64,' + data.image;
+                processedImage.style.display = 'block';
+            } else {
+                processedImage.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> -->
+
+
+
+
+
+
