@@ -4,11 +4,7 @@
 
 The AI-Driven Financial Planner is a comprehensive tool designed to help individuals optimize their financial strategies by leveraging artificial intelligence. The planner assists users in areas such as tax saving, investment planning, stock portfolio restructuring, and AI-based stock prediction. By integrating user-specific data, market trends, and video inputs, the financial planner delivers tailored advice to meet diverse financial goals. This application provides detailed insights into taxes, smart investments, and stock management, enabling users to make informed decisions in an ever-evolving financial landscape.
 
-## Intel Toolkits Used:
 
-1. OpenVino: OpenVINO™ (Open Visual Inference and Neural Network Optimization) is a toolkit developed by Intel for optimizing and deploying AI inference workloads, particularly in the context of deep learning models. It allows you to run models across various Intel hardware, such as CPUs, GPUs, VPUs (Vision Processing Units), and FPGAs (Field Programmable Gate Arrays).
-
-2. DPNP: DPNP is a Data Parallel NumPy library, a part of Intel's oneAPI ecosystem. It provides a high-performance, NumPy-compatible API for numerical computations.
 
 # **Features:**
 
